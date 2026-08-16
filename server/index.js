@@ -44,7 +44,8 @@ app.use(cors({
     "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
-    process.env.FRONTEND_URL // Allow Vercel production frontend
+    "https://bhasmaarti-website.vercel.app", // Allow Vercel production frontend
+    process.env.FRONTEND_URL                 // Allow any dynamically configured frontend URL
   ].filter(Boolean), // Remove undefined if FRONTEND_URL is not set
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
