@@ -2,7 +2,7 @@
  * Auth Controller
  *
  * All admin authentication logic lives here.
- * Uses the Admin model (entity) which queries bhasmaarti_db → admins table.
+ * Uses the Admin model (entity) which queries the database admins table.
  */
 
 const bcrypt = require("bcryptjs");
@@ -25,7 +25,7 @@ const login = async (req, res) => {
       });
     }
 
-    // Fetch admin from the database (bhasmaarti_db → admins table)
+    // Fetch admin from the database (admins table)
     const admin = await Admin.findByEmail(email.trim().toLowerCase());
 
     if (!admin) {

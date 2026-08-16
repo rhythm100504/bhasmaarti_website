@@ -34,7 +34,7 @@ const uploadFields = upload.fields([
 ]);
 
 const deleteLocalFile = async (fileUrl) => {
-  if (fileUrl && fileUrl.startsWith("http://localhost:5001/uploads/")) {
+  if (fileUrl && fileUrl.startsWith(`${process.env.BASE_URL || "http://localhost:5001"}/uploads/`)) {
     const filename = fileUrl.split("/uploads/")[1];
     if (filename) {
       const filePath = path.join(UPLOAD_DIR, filename);
@@ -64,7 +64,7 @@ const createItem = async (req, res) => {
       return res.status(400).json({ success: false, message: "An audio file upload is required." });
     }
 
-    const audio_url = `http://localhost:5001/uploads/${audioFile.filename}`;
+    const audio_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${audioFile.filename}`;
     let thumbnail_url = null;
 
     // Register audio file in Media Library
@@ -78,7 +78,7 @@ const createItem = async (req, res) => {
     });
 
     if (thumbnailFile) {
-      thumbnail_url = `http://localhost:5001/uploads/${thumbnailFile.filename}`;
+      thumbnail_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${thumbnailFile.filename}`;
       // Register custom thumbnail file in Media Library
       await Media.insertMedia({
         name: thumbnailFile.originalname,
@@ -162,7 +162,7 @@ const editItem = async (req, res) => {
     if (audioFile) {
       // Delete old file
       await deleteLocalFile(existing.audio_url);
-      audio_url = `http://localhost:5001/uploads/${audioFile.filename}`;
+      audio_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${audioFile.filename}`;
       // Register new file in media
       await Media.insertMedia({
         name: audioFile.originalname,
@@ -178,7 +178,7 @@ const editItem = async (req, res) => {
       if (existing.thumbnail_url && !existing.thumbnail_url.includes("rudrashtakam.jpeg")) {
         await deleteLocalFile(existing.thumbnail_url);
       }
-      thumbnail_url = `http://localhost:5001/uploads/${thumbnailFile.filename}`;
+      thumbnail_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${thumbnailFile.filename}`;
       await Media.insertMedia({
         name: thumbnailFile.originalname,
         filename: thumbnailFile.filename,

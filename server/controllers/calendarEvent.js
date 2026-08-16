@@ -31,7 +31,7 @@ const upload = multer({
 const uploadSingle = upload.single("image");
 
 const deleteLocalFile = async (fileUrl) => {
-  if (fileUrl && fileUrl.startsWith("http://localhost:5001/uploads/")) {
+  if (fileUrl && fileUrl.startsWith(`${process.env.BASE_URL || "http://localhost:5001"}/uploads/`)) {
     const filename = fileUrl.split("/uploads/")[1];
     if (filename) {
       const filePath = path.join(UPLOAD_DIR, filename);
@@ -58,7 +58,7 @@ const createEvent = async (req, res) => {
       return res.status(400).json({ success: false, message: "A thumbnail image file upload is required." });
     }
 
-    const image_url = `http://localhost:5001/uploads/${req.file.filename}`;
+    const image_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${req.file.filename}`;
 
     // Register image file in Media Library
     await Media.insertMedia({
@@ -133,7 +133,7 @@ const editEvent = async (req, res) => {
     if (req.file) {
       // Delete old file
       await deleteLocalFile(existing.image_url);
-      image_url = `http://localhost:5001/uploads/${req.file.filename}`;
+      image_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${req.file.filename}`;
       // Register new file in media
       await Media.insertMedia({
         name: req.file.originalname,

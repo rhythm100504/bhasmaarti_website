@@ -62,7 +62,7 @@ const uploadFile = async (req, res) => {
     }
 
     // Public URL matching static folder serving on port 5001
-    const file_url = `http://localhost:5001/uploads/${req.file.filename}`;
+    const file_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${req.file.filename}`;
     const duration = req.body.duration || null;
 
     const media = await Media.insertMedia({

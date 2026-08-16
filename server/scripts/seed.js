@@ -1,10 +1,6 @@
 /**
  * Seed Script — inserts the default admin account.
  *
- * Database : bhasmaarti_db
- * User     : postgres
- * Host     : localhost:5432
- *
  * Admin credentials seeded:
  *   email    → admin@bhasmaarti.com
  *   password → admin123  (stored as bcrypt hash)
@@ -19,7 +15,7 @@ const pool = require("../config/database");
 
 const seed = async () => {
   try {
-    console.log("\n🌱  Running seed for bhasmaarti_db …\n");
+    console.log("\n🌱  Running seed for database …\n");
 
     // 1. Ensure the table exists
     await Admin.createTable();

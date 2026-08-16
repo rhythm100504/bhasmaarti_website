@@ -53,7 +53,7 @@ const getCategoryFallbackImage = (category) => {
 };
 
 const deleteLocalFile = async (fileUrl) => {
-  if (fileUrl && fileUrl.startsWith("http://localhost:5001/uploads/")) {
+  if (fileUrl && fileUrl.startsWith(`${process.env.BASE_URL || "http://localhost:5001"}/uploads/`)) {
     const filename = fileUrl.split("/uploads/")[1];
     if (filename) {
       const filePath = path.join(UPLOAD_DIR, filename);
@@ -96,7 +96,7 @@ const createAarti = async (req, res) => {
       return res.status(400).json({ success: false, message: "A video file upload is required." });
     }
 
-    const video_url = `http://localhost:5001/uploads/${videoFile.filename}`;
+    const video_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${videoFile.filename}`;
     let thumbnail_url = null;
 
     // Register video file in Media Library
@@ -110,7 +110,7 @@ const createAarti = async (req, res) => {
     });
 
     if (thumbnailFile) {
-      thumbnail_url = `http://localhost:5001/uploads/${thumbnailFile.filename}`;
+      thumbnail_url = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${thumbnailFile.filename}`;
       // Register custom thumbnail file in Media Library
       await Media.insertMedia({
         name: thumbnailFile.originalname,
@@ -176,7 +176,7 @@ const editAarti = async (req, res) => {
     let updatedThumbnailUrl = item.thumbnail_url;
 
     if (videoFile) {
-      updatedVideoUrl = `http://localhost:5001/uploads/${videoFile.filename}`;
+      updatedVideoUrl = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${videoFile.filename}`;
       await deleteLocalFile(item.video_url);
 
       // Register video file in Media Library
@@ -191,7 +191,7 @@ const editAarti = async (req, res) => {
     }
 
     if (thumbnailFile) {
-      updatedThumbnailUrl = `http://localhost:5001/uploads/${thumbnailFile.filename}`;
+      updatedThumbnailUrl = `${process.env.BASE_URL || "http://localhost:5001"}/uploads/${thumbnailFile.filename}`;
       // Clean up old custom thumbnail if it was uploaded locally (not a default placeholder)
       if (item.thumbnail_url && !item.thumbnail_url.startsWith("/")) {
         await deleteLocalFile(item.thumbnail_url);

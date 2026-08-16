@@ -5,7 +5,7 @@ const cors = require("cors");
 const path = require("path");
 
 
-// ── Database connection (bhasmaarti_db on postgres@localhost:5432) ───────────
+// ── Database connection ───────────
 // Importing this module immediately opens the connection pool and validates
 // the connection. If the DB is unreachable, the process exits with code 1.
 const pool = require("./config/database");
@@ -64,10 +64,7 @@ app.get("/health", async (_req, res) => {
     res.status(200).json({
       status: "ok",
       service: "BhasmaArti Admin API",
-      database: "bhasmaarti_db",
-      db_user: "postgres",
-      db_host: "localhost:5432",
-      db_time: result.rows[0].db_time,
+      database_connected: true,
       timestamp: new Date().toISOString(),
     });
   } catch {
@@ -114,12 +111,11 @@ const start = async () => {
     await GalleryItem.createTable();
 
 
-    app.listen(PORT, () => {
-      console.log(`\n🔥  BhasmaArti Admin API → http://localhost:${PORT}`);
-      console.log(`    Database : bhasmaarti_db (postgres@localhost:5432)`);
-      console.log(`    Health   : GET  http://localhost:${PORT}/health`);
-      console.log(`    Login    : POST http://localhost:${PORT}/api/auth/login`);
-      console.log(`    Verify   : GET  http://localhost:${PORT}/api/auth/verify\n`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`\n🔥  BhasmaArti Admin API running on port ${PORT}`);
+      console.log(`    Health   : GET  /health`);
+      console.log(`    Login    : POST /api/auth/login`);
+      console.log(`    Verify   : GET  /api/auth/verify\n`);
       console.log("    Run seeder if first time: node scripts/seed.js\n");
     });
   } catch (err) {
