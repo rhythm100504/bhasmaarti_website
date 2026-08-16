@@ -22,7 +22,7 @@ export default function LatestAarti() {
   useEffect(() => {
     const fetchAartis = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/aartis");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis`);
         const data = await res.json();
         if (data.success && data.aartis) {
           const published = data.aartis.filter((a: AartiItem) => a.status === "Published");

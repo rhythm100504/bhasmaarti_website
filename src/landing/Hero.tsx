@@ -26,7 +26,7 @@ export default function Hero() {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/hero");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/hero`);
         const data = await res.json();
         if (data.success && data.settings) {
           setHeroData(data.settings);

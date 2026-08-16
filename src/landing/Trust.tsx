@@ -136,7 +136,7 @@ export default function Trust() {
   useEffect(() => {
     const fetchTrustData = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/trust");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust`);
         const data = await res.json();
         if (data.success) {
           if (data.settings) setSettings(data.settings);

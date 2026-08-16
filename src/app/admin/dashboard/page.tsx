@@ -89,7 +89,7 @@ export default function AdminDashboard() {
         return;
       }
       try {
-        const res = await fetch("http://localhost:5001/api/auth/verify", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardHero = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/hero");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/hero`);
         const data = await res.json();
         if (data.success && data.settings) {
           setHeroEyebrow(data.settings.eyebrow);
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardAbout = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/about");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/about`);
         const data = await res.json();
         if (data.success && data.settings) {
           setAboutLabel(data.settings.eyebrow);
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardTrust = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/trust");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust`);
         const data = await res.json();
         if (data.success) {
           if (data.settings) {
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
 
   const fetchRecordings = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/aartis");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis`);
       const data = await res.json();
       if (data.success && data.aartis) {
         setRecordings(data.aartis);
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
 
   const fetchLibraryResources = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/library");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/library`);
       const data = await res.json();
       if (data.success && data.items) {
         setLibraryResources(data.items);
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
 
   const fetchGalleryItems = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/gallery");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/gallery`);
       const data = await res.json();
       if (data.success && data.items) {
         // Map backend gallery moments to frontend GalleryItem format
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
 
   const fetchOccasions = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/calendar");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/calendar`);
       const data = await res.json();
       if (data.success && data.events) {
         const mapped = data.events.map((e: any) => ({
@@ -296,7 +296,7 @@ export default function AdminDashboard() {
 
   const fetchTrustFeatures = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/trust");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust`);
       const data = await res.json();
       if (data.success && data.features) {
         setTrustCards(data.features);
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
     setAdminsLoading(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/admins", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/admins`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -343,7 +343,7 @@ export default function AdminDashboard() {
     setAdminFormSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/admins", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/admins`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -387,7 +387,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/admins/${id}/toggle`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/admins/${id}/toggle`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/admins/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/admins/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -510,7 +510,7 @@ export default function AdminDashboard() {
   const fetchMediaItems = async () => {
     setMediaLoading(true);
     try {
-      const res = await fetch("http://localhost:5001/api/media");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/media`);
       const data = await res.json();
       if (res.ok && data.success) {
         setMediaItems(data.media);
@@ -578,7 +578,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/media/upload", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/media/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
@@ -606,7 +606,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/media/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/media/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -704,7 +704,7 @@ export default function AdminDashboard() {
     const token = localStorage.getItem("bhasmaAdminToken");
     // Notify server (fire-and-forget)
     if (token) {
-      fetch("http://localhost:5001/api/auth/logout", {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/auth/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {});
@@ -722,7 +722,7 @@ export default function AdminDashboard() {
     setHeroFormSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/hero", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/hero`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -756,7 +756,7 @@ export default function AdminDashboard() {
     setHeroFormSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/hero/reset", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/hero/reset`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
@@ -789,7 +789,7 @@ export default function AdminDashboard() {
     setAboutFormSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/about", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/about`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -824,7 +824,7 @@ export default function AdminDashboard() {
     setAboutFormSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/about/reset", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/about/reset`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
@@ -856,7 +856,7 @@ export default function AdminDashboard() {
     setTrustHeadersSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/trust", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -887,7 +887,7 @@ export default function AdminDashboard() {
     setTrustHeadersSubmitting(true);
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch("http://localhost:5001/api/trust/reset", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust/reset`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`
@@ -928,8 +928,8 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("bhasmaAdminToken");
       const isEditing = editingFeatureId !== null;
       const url = isEditing
-        ? `http://localhost:5001/api/trust/features/${editingFeatureId}`
-        : "http://localhost:5001/api/trust/features";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust/features/${editingFeatureId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust/features`;
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -972,7 +972,7 @@ export default function AdminDashboard() {
     if (confirm("Are you sure you want to permanently delete this Aarti recording?")) {
       try {
         const token = localStorage.getItem("bhasmaAdminToken");
-        const res = await fetch(`http://localhost:5001/api/aartis/${id}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis/${id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`
@@ -1000,7 +1000,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/trust/features/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust/features/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1113,8 +1113,8 @@ export default function AdminDashboard() {
       }
 
       const url = editingAartiId
-        ? `http://localhost:5001/api/aartis/${editingAartiId}`
-        : "http://localhost:5001/api/aartis";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis/${editingAartiId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis`;
       const method = editingAartiId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -1241,8 +1241,8 @@ export default function AdminDashboard() {
       }
 
       const url = editingLibraryId
-        ? `http://localhost:5001/api/library/${editingLibraryId}`
-        : "http://localhost:5001/api/library";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/library/${editingLibraryId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/library`;
       const method = editingLibraryId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -1275,7 +1275,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/library/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/library/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1342,8 +1342,8 @@ export default function AdminDashboard() {
       }
 
       const url = editingCalendarId
-        ? `http://localhost:5001/api/calendar/${editingCalendarId}`
-        : "http://localhost:5001/api/calendar";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/calendar/${editingCalendarId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/calendar`;
       const method = editingCalendarId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -1376,7 +1376,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/calendar/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/calendar/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1440,8 +1440,8 @@ export default function AdminDashboard() {
       }
 
       const url = editingGalleryId
-        ? `http://localhost:5001/api/gallery/${editingGalleryId}`
-        : "http://localhost:5001/api/gallery";
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/gallery/${editingGalleryId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/gallery`;
       const method = editingGalleryId ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -1474,7 +1474,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/gallery/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/gallery/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -1500,7 +1500,7 @@ export default function AdminDashboard() {
   const toggleTrustCardStatus = async (id: number) => {
     try {
       const token = localStorage.getItem("bhasmaAdminToken");
-      const res = await fetch(`http://localhost:5001/api/trust/features/${id}/toggle`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust/features/${id}/toggle`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` }
       });

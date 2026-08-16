@@ -32,7 +32,7 @@ export default function LibraryPage() {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/library");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/library`);
         const data = await res.json();
         if (data.success && data.items) {
           const published = data.items.filter((item: any) => item.status === "Published").map((item: any) => ({

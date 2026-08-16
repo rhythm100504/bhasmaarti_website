@@ -37,7 +37,7 @@ export default function About() {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/about");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/about`);
         const data = await res.json();
         if (data.success && data.settings) {
           setAboutData(data.settings);
