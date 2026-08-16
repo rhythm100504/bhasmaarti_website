@@ -1,3 +1,4 @@
+import { API_URL } from "@/config";
 import React, { useState, useEffect } from "react";
 
 interface OccasionItem {
@@ -15,7 +16,7 @@ export default function Festivals() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/calendar`);
+        const res = await fetch(`${API_URL}/api/calendar`);
         const data = await res.json();
         if (data.success && data.items) {
           const published = data.items

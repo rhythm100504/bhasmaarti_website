@@ -1,5 +1,7 @@
 "use client";
 
+
+import { API_URL } from "@/config";
 import React, { useState, useEffect, useRef } from "react";
 
 interface AartiItem {
@@ -22,7 +24,7 @@ export default function LatestAarti() {
   useEffect(() => {
     const fetchAartis = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis`);
+        const res = await fetch(`${API_URL}/api/aartis`);
         const data = await res.json();
         if (data.success && data.aartis) {
           const published = data.aartis.filter((a: AartiItem) => a.status === "Published");

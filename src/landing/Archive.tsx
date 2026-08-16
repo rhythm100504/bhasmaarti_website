@@ -1,5 +1,7 @@
 "use client";
 
+
+import { API_URL } from "@/config";
 import React, { useState, useEffect } from "react";
 
 interface AartiItem {
@@ -32,7 +34,7 @@ export default function Archive() {
   useEffect(() => {
     const fetchAartis = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/aartis`);
+        const res = await fetch(`${API_URL}/api/aartis`);
         const data = await res.json();
         if (data.success && data.aartis) {
           // Filter to only display 'Published' ones on the landing page

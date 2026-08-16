@@ -1,5 +1,7 @@
 "use client";
 
+
+import { API_URL } from "@/config";
 import React, { useEffect, useState } from "react";
 
 interface AboutStat {
@@ -37,7 +39,7 @@ export default function About() {
   useEffect(() => {
     const fetchAboutData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/about`);
+        const res = await fetch(`${API_URL}/api/about`);
         const data = await res.json();
         if (data.success && data.settings) {
           setAboutData(data.settings);

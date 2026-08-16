@@ -1,5 +1,7 @@
 "use client";
 
+
+import { API_URL } from "@/config";
 import React, { useEffect, useState } from "react";
 
 interface FeatureCard {
@@ -136,7 +138,7 @@ export default function Trust() {
   useEffect(() => {
     const fetchTrustData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/trust`);
+        const res = await fetch(`${API_URL}/api/trust`);
         const data = await res.json();
         if (data.success) {
           if (data.settings) setSettings(data.settings);

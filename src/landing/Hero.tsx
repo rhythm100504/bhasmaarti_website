@@ -1,5 +1,7 @@
 "use client";
 
+
+import { API_URL } from "@/config";
 import React, { useEffect, useRef, useState } from "react";
 
 interface HeroData {
@@ -26,7 +28,7 @@ export default function Hero() {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001"}/api/hero`);
+        const res = await fetch(`${API_URL}/api/hero`);
         const data = await res.json();
         if (data.success && data.settings) {
           setHeroData(data.settings);
