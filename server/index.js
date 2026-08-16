@@ -131,12 +131,26 @@ const start = async () => {
     await GalleryItem.createTable();
 
 
+    // ── Auto Seed ────────────────────────────────────────────────────────────
+    const bcrypt = require("bcryptjs");
+    const hasAdmin = await Admin.exists();
+    if (!hasAdmin) {
+      console.log("🌱 No admins found. Seeding default admin...");
+      const passwordHash = await bcrypt.hash("admin", 12); // Password is 'admin' to match previous tests
+      await Admin.create({
+        name: "Temple Admin",
+        email: "admin@bhasmaarti.com",
+        password: passwordHash,
+        role: "administrator",
+      });
+      console.log("✅ Default admin seeded successfully. (email: admin@bhasmaarti.com, password: admin)");
+    }
+
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n🔥  BhasmaArti Admin API running on port ${PORT}`);
       console.log(`    Health   : GET  /health`);
       console.log(`    Login    : POST /api/auth/login`);
       console.log(`    Verify   : GET  /api/auth/verify\n`);
-      console.log("    Run seeder if first time: node scripts/seed.js\n");
     });
   } catch (err) {
     console.error("❌  Failed to start server:", err.message);
