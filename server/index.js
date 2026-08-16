@@ -39,14 +39,32 @@ const PORT = process.env.PORT || 5001;
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3001",
-    "https://bhasmaarti-website.vercel.app", // Allow Vercel production frontend
-    process.env.FRONTEND_URL                 // Allow any dynamically configured frontend URL
-  ].filter(Boolean), // Remove undefined if FRONTEND_URL is not set
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    const allowedLocals = [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3001"
+    ];
+
+    // 1. Allow localhost development
+    if (allowedLocals.includes(origin)) return callback(null, true);
+
+    // 2. Allow exact Vercel production domain
+    if (origin === "https://bhasmaarti-website.vercel.app") return callback(null, true);
+
+    // 3. Allow Vercel preview/deployment URLs for this specific project
+    if (origin.startsWith("https://bhasmaarti-website") && origin.endsWith(".vercel.app")) return callback(null, true);
+
+    // 4. Allow explicitly configured environment variable URL
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) return callback(null, true);
+
+    // 5. Reject everything else
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
