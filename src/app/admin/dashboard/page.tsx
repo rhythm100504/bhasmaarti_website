@@ -233,9 +233,64 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchLibraryResources = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/library");
+      const data = await res.json();
+      if (data.success && data.items) {
+        setLibraryResources(data.items);
+      }
+    } catch (err) {
+      console.error("Failed to load library resources", err);
+    }
+  };
+
+  const fetchGalleryItems = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/gallery");
+      const data = await res.json();
+      if (data.success && data.items) {
+        // Map backend gallery moments to frontend GalleryItem format
+        const mapped = data.items.map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          date: e.date,
+          fileName: e.image_url ? e.image_url.split("/uploads/")[1] || e.image_url : "",
+          status: e.status
+        }));
+        setGalleryItems(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load gallery items", err);
+    }
+  };
+
+  const fetchOccasions = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/calendar");
+      const data = await res.json();
+      if (data.success && data.events) {
+        const mapped = data.events.map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          date: e.date,
+          image: e.image_url,
+          aartisCount: e.aartis_count,
+          status: e.status
+        }));
+        setOccasions(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load occasions", err);
+    }
+  };
+
   useEffect(() => {
     if (authChecked) {
       fetchRecordings();
+      fetchLibraryResources();
+      fetchGalleryItems();
+      fetchOccasions();
     }
   }, [authChecked]);
 
@@ -402,15 +457,7 @@ export default function AdminDashboard() {
   const [heroCtaSecondary, setHeroCtaSecondary] = useState("Explore Archive");
 
   // 2. Latest Aarti Section State Data
-  const [featuredAartiTitle, setFeaturedAartiTitle] = useState("Bhasma Aarti — Shri Mahakaleshwar");
-  const [featuredAartiDate, setFeaturedAartiDate] = useState("Today, Brahma Muhurta • 04:00 AM");
-  const [featuredAartiDuration, setFeaturedAartiDuration] = useState("44:18");
-  const [recentAartis, setRecentAartis] = useState<RecentAartiItem[]>([
-    { id: 1, title: "Bhasma Aarti — Sunday Special", date: "Yesterday • Brahma Muhurta", duration: "44:18", image: "/aarti-diya-thumb.png" },
-    { id: 2, title: "Sandhya Aarti — Evening Prayer", date: "2 days ago • Sunset Muhurta", duration: "52:03", image: "/temple-bell-thumb.png" },
-    { id: 3, title: "Shayan Aarti — Night Blessing", date: "3 days ago • Night Prayer", duration: "38:45", image: "/mahakal-temple.png" },
-    { id: 4, title: "Mahashivratri Special Aarti", date: "Festival Recording • Full Ceremony", duration: "1:12:30", image: "/bhasma-aarti-preview.png" },
-  ]);
+
 
   // 3. About Section State Data
   const [aboutLabel, setAboutLabel] = useState("The Sacred Legend");
@@ -610,31 +657,48 @@ export default function AdminDashboard() {
   const [currentThumbUrl, setCurrentThumbUrl] = useState("");
 
 
-  // 6. Devotional Library State Data
-  const [libraryResources, setLibraryResources] = useState<LibraryResource[]>([
-    { id: 1, title: "Mahakal Chalisa", category: "Chalisa & Hymns", duration: "09:45", status: "Published" },
-    { id: 2, title: "Shiv Tandav Stotram", category: "Stotrams", duration: "12:15", status: "Published" },
-    { id: 3, title: "Mahamrityunjaya Mantra", category: "Mantras", duration: "05:30", status: "Published" },
-    { id: 4, title: "Shiv Bhajans Collection", category: "Bhajans", duration: "24:50", status: "Published" },
-    { id: 5, title: "Rudrashtakam", category: "Chalisa & Hymns", duration: "08:10", status: "Draft" },
-  ]);
+  // 6. Devotional Library State Data & Modals
+  const [libraryResources, setLibraryResources] = useState<LibraryResource[]>([]);
+  const [showLibraryModal, setShowLibraryModal] = useState(false);
+  const [libraryTitle, setLibraryTitle] = useState("");
+  const [libraryDescription, setLibraryDescription] = useState("");
+  const [libraryCategory, setLibraryCategory] = useState("Stotrams");
+  const [libraryDuration, setLibraryDuration] = useState("");
+  const [libraryLyrics, setLibraryLyrics] = useState("");
+  const [libraryTranslation, setLibraryTranslation] = useState("");
+  const [libraryStatus, setLibraryStatus] = useState<"Published" | "Draft">("Published");
+  const [libraryAudioFile, setLibraryAudioFile] = useState<File | null>(null);
+  const [libraryThumbFile, setLibraryThumbFile] = useState<File | null>(null);
+  const [editingLibraryId, setEditingLibraryId] = useState<number | null>(null);
+  const [librarySubmitting, setLibrarySubmitting] = useState(false);
+  const [currentLibraryAudioUrl, setCurrentLibraryAudioUrl] = useState("");
+  const [currentLibraryThumbUrl, setCurrentLibraryThumbUrl] = useState("");
+  const [libraryDate, setLibraryDate] = useState("");
 
-  // 7. Sacred Moments State Data
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([
-    { id: 1, title: "Bhasma Aarti Flames", date: "15 June 2026", fileName: "Bhasma Aarti Flames.png", status: "Published" },
-    { id: 2, title: "Temple Bells at Brahma Muhurta", date: "14 June 2026", fileName: "Temple Bells at Brahma Muhurta.webp", status: "Published" },
-    { id: 3, title: "Sacred Abhishek Ritual", date: "13 June 2026", fileName: "Sacred Abhishek Ritual.jpg", status: "Published" },
-    { id: 4, title: "Mahakaleshwar Shikhara at Dawn", date: "12 June 2026", fileName: "Mahakaleshwar Shikhara at Dawn.jpg", status: "Published" },
-    { id: 5, title: "Full Moon over Ujjain", date: "11 June 2026", fileName: "Full Moon over Ujjain.jpeg", status: "Draft" },
-  ]);
+  // 7. Sacred Moments State Data & Modals
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [showGalleryModal, setShowGalleryModal] = useState(false);
+  const [galleryTitle, setGalleryTitle] = useState("");
+  const [galleryDescription, setGalleryDescription] = useState("");
+  const [galleryDateStr, setGalleryDateStr] = useState("");
+  const [galleryStatus, setGalleryStatus] = useState<"Published" | "Draft">("Published");
+  const [galleryImageFile, setGalleryImageFile] = useState<File | null>(null);
+  const [editingGalleryId, setEditingGalleryId] = useState<number | null>(null);
+  const [gallerySubmitting, setGallerySubmitting] = useState(false);
+  const [currentGalleryImageUrl, setCurrentGalleryImageUrl] = useState("");
 
-  // 8. Sacred Calendar State Data
-  const [occasions, setOccasions] = useState<OccasionItem[]>([
-    { id: 1, title: "Mahashivratri", date: "15 February 2026", image: "Mahashivratri.jpg", aartisCount: 5, status: "Published" },
-    { id: 2, title: "Shravan Maas", date: "05 August 2025", image: "Shravan Maas.jpeg", aartisCount: 5, status: "Published" },
-    { id: 3, title: "Sawan Somvar", date: "11 August 2025", image: "Sawan Somvar.jpg", aartisCount: 5, status: "Published" },
-    { id: 4, title: "Nag Panchami", date: "29 August 2025", image: "Nag Panchami.jpeg", aartisCount: 5, status: "Published" },
-  ]);
+  // 8. Sacred Calendar State Data & Modals
+  const [occasions, setOccasions] = useState<OccasionItem[]>([]);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [calendarTitle, setCalendarTitle] = useState("");
+  const [calendarDescription, setCalendarDescription] = useState("");
+  const [calendarDateStr, setCalendarDateStr] = useState("");
+  const [calendarMoreInfo, setCalendarMoreInfo] = useState("");
+  const [calendarStatus, setCalendarStatus] = useState<"Published" | "Draft">("Published");
+  const [calendarImageFile, setCalendarImageFile] = useState<File | null>(null);
+  const [editingCalendarId, setEditingCalendarId] = useState<number | null>(null);
+  const [calendarSubmitting, setCalendarSubmitting] = useState(false);
+  const [currentCalendarImageUrl, setCurrentCalendarImageUrl] = useState("");
 
   const handleLogout = async () => {
     const token = localStorage.getItem("bhasmaAdminToken");
@@ -716,10 +780,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveFeaturedAarti = (e: React.FormEvent) => {
-    e.preventDefault();
-    showToast("Featured Bhasma Aarti video details saved!");
-  };
+
 
   const [aboutFormSubmitting, setAboutFormSubmitting] = useState(false);
 
@@ -931,33 +992,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteResource = (id: number) => {
-    if (confirm("Are you sure you want to delete this spiritual resource?")) {
-      setLibraryResources(libraryResources.filter((res) => res.id !== id));
-      showToast("Spiritual resource deleted.", "info");
-    }
-  };
 
-  const handleDeleteGallery = (id: number) => {
-    if (confirm("Are you sure you want to delete this gallery item?")) {
-      setGalleryItems(galleryItems.filter((item) => item.id !== id));
-      showToast("Sacred Moment deleted.", "info");
-    }
-  };
-
-  const handleDeleteOccasion = (id: number) => {
-    if (confirm("Are you sure you want to delete this calendar occasion?")) {
-      setOccasions(occasions.filter((occ) => occ.id !== id));
-      showToast("Calendar occasion deleted.", "info");
-    }
-  };
-
-  const handleDeleteRecentAarti = (id: number) => {
-    if (confirm("Are you sure you want to remove this recent video?")) {
-      setRecentAartis(recentAartis.filter((item) => item.id !== id));
-      showToast("Recent video removed from home grid.", "info");
-    }
-  };
 
   const handleDeleteTrustCard = async (id: number) => {
     if (!confirm("Are you sure you want to permanently delete this trust feature card?")) {
@@ -1109,33 +1144,355 @@ export default function AdminDashboard() {
   };
 
 
-  const handleAddMockResource = () => {
-    const newId = libraryResources.length > 0 ? Math.max(...libraryResources.map((r) => r.id)) + 1 : 1;
-    const mock: LibraryResource = { id: newId, title: "Shiv Sahasranama", category: "Chalisa & Hymns", duration: "32:40", status: "Published" };
-    setLibraryResources([mock, ...libraryResources]);
-    showToast("Added mock resource to Library database!");
+  // --- DEVOTIONAL LIBRARY HANDLERS ---
+  const resetLibraryForm = () => {
+    setLibraryTitle("");
+    setLibraryDescription("");
+    setLibraryCategory("Stotrams");
+    setLibraryDuration("");
+    setLibraryLyrics("");
+    setLibraryTranslation("");
+    setLibraryStatus("Published");
+    setLibraryAudioFile(null);
+    setLibraryThumbFile(null);
+    setEditingLibraryId(null);
+    setCurrentLibraryAudioUrl("");
+    setCurrentLibraryThumbUrl("");
+    setLibraryDate("");
   };
 
-  const handleAddMockGallery = () => {
-    const newId = galleryItems.length > 0 ? Math.max(...galleryItems.map((r) => r.id)) + 1 : 1;
-    const mock: GalleryItem = { id: newId, title: "Evening Aarti Glow", date: "14 June 2026", fileName: "evening glow.jpeg", status: "Published" };
-    setGalleryItems([mock, ...galleryItems]);
-    showToast("Added mock photo to Moments Gallery!");
+  const handleEditLibraryClick = (res: LibraryResource & { description?: string, lyrics?: string, translation?: string, audio_url?: string, thumbnail_url?: string, created_at?: string }) => {
+    setEditingLibraryId(res.id);
+    setLibraryTitle(res.title);
+    setLibraryDescription(res.description || "");
+    setLibraryCategory(res.category);
+    setLibraryDuration(res.duration);
+    setLibraryLyrics(res.lyrics || "");
+    setLibraryTranslation(res.translation || "");
+    setLibraryStatus(res.status);
+    setLibraryAudioFile(null);
+    setLibraryThumbFile(null);
+    setCurrentLibraryAudioUrl(res.audio_url || "");
+    setCurrentLibraryThumbUrl(res.thumbnail_url || "");
+
+    if (res.created_at) {
+      const dateObj = new Date(res.created_at);
+      const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+      setLibraryDate(formatter.format(dateObj));
+    } else {
+      setLibraryDate("");
+    }
+    setShowLibraryModal(true);
   };
 
-  const handleAddMockOccasion = () => {
-    const newId = occasions.length > 0 ? Math.max(...occasions.map((r) => r.id)) + 1 : 1;
-    const mock: OccasionItem = { id: newId, title: "Kartik Somvar Special", date: "10 November 2025", image: "Sawan Somvar.jpg", aartisCount: 5, status: "Draft" };
-    setOccasions([mock, ...occasions]);
-    showToast("Added mock occasion to Sacred Calendar!");
+  const handleLibraryAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLibraryAudioFile(file);
+      // Try to read audio duration
+      const audioUrl = URL.createObjectURL(file);
+      const audioEl = document.createElement("audio");
+      audioEl.src = audioUrl;
+      audioEl.onloadedmetadata = () => {
+        const durationSeconds = Math.round(audioEl.duration);
+        const minutes = Math.floor(durationSeconds / 60);
+        const seconds = durationSeconds % 60;
+        const formattedDuration = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        setLibraryDuration(formattedDuration);
+        URL.revokeObjectURL(audioUrl);
+      };
+    }
   };
 
-  const handleAddMockRecentAarti = () => {
-    const newId = recentAartis.length > 0 ? Math.max(...recentAartis.map((r) => r.id)) + 1 : 1;
-    const mock: RecentAartiItem = { id: newId, title: "Bhasma Aarti — Midweek Special", date: "Today", duration: "46:12", image: "/bhasma-aarti-preview.png" };
-    setRecentAartis([mock, ...recentAartis]);
-    showToast("Added mock video to homepage grid!");
+  const handleSaveLibrary = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!libraryTitle || !libraryCategory) {
+      showToast("Please provide a title and category.", "info");
+      return;
+    }
+    if (!editingLibraryId && !libraryAudioFile) {
+      showToast("An audio file upload is required.", "info");
+      return;
+    }
+    setLibrarySubmitting(true);
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const formData = new FormData();
+      formData.append("title", libraryTitle);
+      formData.append("description", libraryDescription);
+      formData.append("category", libraryCategory);
+      formData.append("duration", libraryDuration || "0:00");
+      formData.append("lyrics", libraryLyrics);
+      formData.append("translation", libraryTranslation);
+      formData.append("status", libraryStatus);
+      if (libraryAudioFile) {
+        formData.append("audio", libraryAudioFile);
+      }
+      if (libraryThumbFile) {
+        formData.append("thumbnail", libraryThumbFile);
+      }
+      if (libraryDate) {
+        formData.append("created_at", libraryDate);
+      }
+
+      const url = editingLibraryId
+        ? `http://localhost:5001/api/library/${editingLibraryId}`
+        : "http://localhost:5001/api/library";
+      const method = editingLibraryId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast(editingLibraryId ? "Library item updated successfully!" : "Library item added successfully!");
+        setShowLibraryModal(false);
+        resetLibraryForm();
+        fetchLibraryResources();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to save library item.", "info");
+      }
+    } catch (err) {
+      console.error("Save library error", err);
+      showToast("Server error occurred.", "info");
+    } finally {
+      setLibrarySubmitting(false);
+    }
   };
+
+  const handleDeleteResource = async (id: number) => {
+    if (!confirm("Are you sure you want to permanently delete this spiritual resource?")) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const res = await fetch(`http://localhost:5001/api/library/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("Spiritual resource deleted successfully.");
+        fetchLibraryResources();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to delete resource.", "info");
+      }
+    } catch (err) {
+      console.error("Delete resource error", err);
+      showToast("Server error occurred.", "info");
+    }
+  };
+
+
+  // --- SACRED CALENDAR HANDLERS ---
+  const resetCalendarForm = () => {
+    setCalendarTitle("");
+    setCalendarDescription("");
+    setCalendarDateStr("");
+    setCalendarMoreInfo("");
+    setCalendarStatus("Published");
+    setCalendarImageFile(null);
+    setEditingCalendarId(null);
+    setCurrentCalendarImageUrl("");
+  };
+
+  const handleEditCalendarClick = (occ: OccasionItem & { description?: string, shringarInfo?: string, more_info?: string, image_url?: string }) => {
+    setEditingCalendarId(occ.id);
+    setCalendarTitle(occ.title);
+    setCalendarDescription(occ.description || "");
+    setCalendarDateStr(occ.date);
+    setCalendarMoreInfo(occ.more_info || occ.shringarInfo || "");
+    setCalendarStatus(occ.status);
+    setCalendarImageFile(null);
+    setCurrentCalendarImageUrl(occ.image || occ.image_url || "");
+    setShowCalendarModal(true);
+  };
+
+  const handleSaveCalendar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!calendarTitle || !calendarDescription || !calendarDateStr) {
+      showToast("Please provide a title, description, and date.", "info");
+      return;
+    }
+    if (!editingCalendarId && !calendarImageFile) {
+      showToast("An image file is required.", "info");
+      return;
+    }
+    setCalendarSubmitting(true);
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const formData = new FormData();
+      formData.append("title", calendarTitle);
+      formData.append("description", calendarDescription);
+      formData.append("date", calendarDateStr);
+      formData.append("more_info", calendarMoreInfo);
+      formData.append("status", calendarStatus);
+      if (calendarImageFile) {
+        formData.append("image", calendarImageFile);
+      }
+
+      const url = editingCalendarId
+        ? `http://localhost:5001/api/calendar/${editingCalendarId}`
+        : "http://localhost:5001/api/calendar";
+      const method = editingCalendarId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast(editingCalendarId ? "Calendar occasion updated successfully!" : "Calendar occasion added successfully!");
+        setShowCalendarModal(false);
+        resetCalendarForm();
+        fetchOccasions();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to save occasion.", "info");
+      }
+    } catch (err) {
+      console.error("Save occasion error", err);
+      showToast("Server error occurred.", "info");
+    } finally {
+      setCalendarSubmitting(false);
+    }
+  };
+
+  const handleDeleteOccasion = async (id: number) => {
+    if (!confirm("Are you sure you want to permanently delete this calendar occasion?")) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const res = await fetch(`http://localhost:5001/api/calendar/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("Calendar occasion deleted successfully.");
+        fetchOccasions();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to delete occasion.", "info");
+      }
+    } catch (err) {
+      console.error("Delete occasion error", err);
+      showToast("Server error occurred.", "info");
+    }
+  };
+
+
+  // --- SACRED MOMENTS (GALLERY) HANDLERS ---
+  const resetGalleryForm = () => {
+    setGalleryTitle("");
+    setGalleryDescription("");
+    setGalleryDateStr("");
+    setGalleryStatus("Published");
+    setGalleryImageFile(null);
+    setEditingGalleryId(null);
+    setCurrentGalleryImageUrl("");
+  };
+
+  const handleEditGalleryClick = (item: GalleryItem & { description?: string, image_url?: string }) => {
+    setEditingGalleryId(item.id);
+    setGalleryTitle(item.title);
+    setGalleryDescription(item.description || "");
+    setGalleryDateStr(item.date);
+    setGalleryStatus(item.status);
+    setGalleryImageFile(null);
+    setCurrentGalleryImageUrl(item.image_url || "");
+    setShowGalleryModal(true);
+  };
+
+  const handleSaveGallery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!galleryTitle || !galleryDescription || !galleryDateStr) {
+      showToast("Please provide a title, description, and date.", "info");
+      return;
+    }
+    if (!editingGalleryId && !galleryImageFile) {
+      showToast("An image file is required.", "info");
+      return;
+    }
+    setGallerySubmitting(true);
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const formData = new FormData();
+      formData.append("title", galleryTitle);
+      formData.append("description", galleryDescription);
+      formData.append("date", galleryDateStr);
+      formData.append("status", galleryStatus);
+      if (galleryImageFile) {
+        formData.append("image", galleryImageFile);
+      }
+
+      const url = editingGalleryId
+        ? `http://localhost:5001/api/gallery/${editingGalleryId}`
+        : "http://localhost:5001/api/gallery";
+      const method = editingGalleryId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        showToast(editingGalleryId ? "Gallery photo updated successfully!" : "Gallery photo added successfully!");
+        setShowGalleryModal(false);
+        resetGalleryForm();
+        fetchGalleryItems();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to save gallery photo.", "info");
+      }
+    } catch (err) {
+      console.error("Save gallery photo error", err);
+      showToast("Server error occurred.", "info");
+    } finally {
+      setGallerySubmitting(false);
+    }
+  };
+
+  const handleDeleteGallery = async (id: number) => {
+    if (!confirm("Are you sure you want to permanently delete this gallery item?")) {
+      return;
+    }
+    try {
+      const token = localStorage.getItem("bhasmaAdminToken");
+      const res = await fetch(`http://localhost:5001/api/gallery/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("Gallery item deleted successfully.");
+        fetchGalleryItems();
+        fetchMediaItems();
+      } else {
+        showToast(data.message || "Failed to delete gallery item.", "info");
+      }
+    } catch (err) {
+      console.error("Delete gallery error", err);
+      showToast("Server error occurred.", "info");
+    }
+  };
+
+
 
   // Mock trust card helper removed
 
@@ -1600,83 +1957,15 @@ export default function AdminDashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
               <div className="dashboard-content-box">
                 <div className="dashboard-content-header">
-                  <h2>Featured Latest Aarti settings</h2>
+                  <h2>Latest Aarti & Recent Video Grid</h2>
                 </div>
-                <form onSubmit={handleSaveFeaturedAarti} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <div className="dashboard-form-group">
-                    <label className="dashboard-label">Featured Video Title</label>
-                    <input
-                      type="text"
-                      className="dashboard-input"
-                      value={featuredAartiTitle}
-                      onChange={(e) => setFeaturedAartiTitle(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="dashboard-form-grid two-col">
-                    <div className="dashboard-form-group">
-                      <label className="dashboard-label">Date & Muhurta Time</label>
-                      <input
-                        type="text"
-                        className="dashboard-input"
-                        value={featuredAartiDate}
-                        onChange={(e) => setFeaturedAartiDate(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="dashboard-form-group">
-                      <label className="dashboard-label">Video Duration</label>
-                      <input
-                        type="text"
-                        className="dashboard-input"
-                        value={featuredAartiDuration}
-                        onChange={(e) => setFeaturedAartiDuration(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button type="submit" className="dashboard-save-btn" style={{ alignSelf: "flex-start" }}>
-                    Update Featured Video Details
-                  </button>
-                </form>
-              </div>
-
-              <div className="dashboard-content-box">
-                <div className="dashboard-content-header">
-                  <h2>Homepage Recent Video Grid (Thumbnails)</h2>
-                  <button className="dashboard-add-btn" onClick={handleAddMockRecentAarti}>
-                    + Add Mock Thumbnail Video
-                  </button>
-                </div>
-                <div className="dashboard-table-wrapper">
-                  <table className="dashboard-table">
-                    <thead>
-                      <tr>
-                        <th>Video Title</th>
-                        <th>Occasion / Date</th>
-                        <th>Duration</th>
-                        <th>Cover Thumbnail</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recentAartis.map((art) => (
-                        <tr key={art.id}>
-                          <td style={{ fontWeight: 500 }}>{art.title}</td>
-                          <td>{art.date}</td>
-                          <td>{art.duration}</td>
-                          <td>
-                            <code style={{ fontSize: "0.75rem", color: "var(--accent-gold)" }}>{art.image}</code>
-                          </td>
-                          <td>
-                            <span className="action-link delete" onClick={() => handleDeleteRecentAarti(art.id)}>
-                              Remove
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div style={{ padding: "1rem", background: "rgba(212, 160, 23, 0.05)", borderLeft: "4px solid var(--accent-gold)", borderRadius: "0 8px 8px 0" }}>
+                  <p style={{ margin: 0, fontSize: "0.95rem", color: "var(--text-primary)" }}>
+                    <strong>Note:</strong> The "Featured Latest Aarti" and the "Recent Video Grid" on the public homepage are <strong>live and automatically synced</strong>. 
+                  </p>
+                  <p style={{ marginTop: "0.5rem", marginBottom: 0, fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+                    The system automatically pulls the <strong>5 most recently published videos</strong> from your <em>Aarti Archive</em>. To change what appears on the homepage, navigate to the <strong>Aarti Archive</strong> tab and upload or edit your recordings.
+                  </p>
                 </div>
               </div>
             </div>
@@ -2129,8 +2418,8 @@ export default function AdminDashboard() {
             <div className="dashboard-content-box">
               <div className="dashboard-content-header">
                 <h2>Spiritual Resources Library</h2>
-                <button className="dashboard-add-btn" onClick={handleAddMockResource}>
-                  + Add Mock Resource
+                <button className="dashboard-add-btn" onClick={() => { resetLibraryForm(); setShowLibraryModal(true); }}>
+                  + Add Resource
                 </button>
               </div>
 
@@ -2146,26 +2435,34 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {libraryResources.map((res) => (
-                      <tr key={res.id}>
-                        <td style={{ fontWeight: 500 }}>{res.title}</td>
-                        <td>{res.category}</td>
-                        <td>{res.duration}</td>
-                        <td>
-                          <span className={`status-badge ${res.status.toLowerCase()}`}>{res.status}</span>
-                        </td>
-                        <td>
-                          <div className="action-links">
-                            <span className="action-link edit" onClick={() => alert(`Edit requested for: ${res.title}`)}>
-                              Edit
-                            </span>
-                            <span className="action-link delete" onClick={() => handleDeleteResource(res.id)}>
-                              Delete
-                            </span>
-                          </div>
+                    {libraryResources.length > 0 ? (
+                      libraryResources.map((res) => (
+                        <tr key={res.id}>
+                          <td style={{ fontWeight: 500 }}>{res.title}</td>
+                          <td>{res.category}</td>
+                          <td>{res.duration}</td>
+                          <td>
+                            <span className={`status-badge ${res.status.toLowerCase()}`}>{res.status}</span>
+                          </td>
+                          <td>
+                            <div className="action-links">
+                              <span className="action-link edit" style={{ cursor: "pointer", marginRight: "0.75rem" }} onClick={() => handleEditLibraryClick(res)}>
+                                Edit
+                              </span>
+                              <span className="action-link delete" style={{ cursor: "pointer" }} onClick={() => handleDeleteResource(res.id)}>
+                                Delete
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: "center", color: "var(--text-secondary)", padding: "2rem" }}>
+                          No resources found. Click "+ Add Resource" to create one.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2177,8 +2474,8 @@ export default function AdminDashboard() {
             <div className="dashboard-content-box">
               <div className="dashboard-content-header">
                 <h2>Sacred Moments Gallery</h2>
-                <button className="dashboard-add-btn" onClick={handleAddMockGallery}>
-                  + Add Mock Photo
+                <button className="dashboard-add-btn" onClick={() => { resetGalleryForm(); setShowGalleryModal(true); }}>
+                  + Add Moment Photo
                 </button>
               </div>
 
@@ -2194,26 +2491,34 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {galleryItems.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ fontWeight: 500 }}>{item.title}</td>
-                        <td>{item.date}</td>
-                        <td>{item.fileName}</td>
-                        <td>
-                          <span className={`status-badge ${item.status.toLowerCase()}`}>{item.status}</span>
-                        </td>
-                        <td>
-                          <div className="action-links">
-                            <span className="action-link edit" onClick={() => alert(`Edit requested for: ${item.title}`)}>
-                              Edit
-                            </span>
-                            <span className="action-link delete" onClick={() => handleDeleteGallery(item.id)}>
-                              Delete
-                            </span>
-                          </div>
+                    {galleryItems.length > 0 ? (
+                      galleryItems.map((item) => (
+                        <tr key={item.id}>
+                          <td style={{ fontWeight: 500 }}>{item.title}</td>
+                          <td>{item.date}</td>
+                          <td>{item.fileName}</td>
+                          <td>
+                            <span className={`status-badge ${item.status.toLowerCase()}`}>{item.status}</span>
+                          </td>
+                          <td>
+                            <div className="action-links">
+                              <span className="action-link edit" style={{ cursor: "pointer", marginRight: "0.75rem" }} onClick={() => handleEditGalleryClick(item)}>
+                                Edit
+                              </span>
+                              <span className="action-link delete" style={{ cursor: "pointer" }} onClick={() => handleDeleteGallery(item.id)}>
+                                Delete
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: "center", color: "var(--text-secondary)", padding: "2rem" }}>
+                          No gallery items found. Click "+ Add Moment Photo" to upload one.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -2225,8 +2530,8 @@ export default function AdminDashboard() {
             <div className="dashboard-content-box">
               <div className="dashboard-content-header">
                 <h2>Sacred Calendar Occasions</h2>
-                <button className="dashboard-add-btn" onClick={handleAddMockOccasion}>
-                  + Add Mock Occasion
+                <button className="dashboard-add-btn" onClick={() => { resetCalendarForm(); setShowCalendarModal(true); }}>
+                  + Add Occasion
                 </button>
               </div>
 
@@ -2243,27 +2548,35 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {occasions.map((occ) => (
-                      <tr key={occ.id}>
-                        <td style={{ fontWeight: 500 }}>{occ.title}</td>
-                        <td>{occ.date}</td>
-                        <td>{occ.image}</td>
-                        <td>{occ.aartisCount} Aartis</td>
-                        <td>
-                          <span className={`status-badge ${occ.status.toLowerCase()}`}>{occ.status}</span>
-                        </td>
-                        <td>
-                          <div className="action-links">
-                            <span className="action-link edit" onClick={() => alert(`Edit requested for: ${occ.title}`)}>
-                              Edit
-                            </span>
-                            <span className="action-link delete" onClick={() => handleDeleteOccasion(occ.id)}>
-                              Delete
-                            </span>
-                          </div>
+                    {occasions.length > 0 ? (
+                      occasions.map((occ) => (
+                        <tr key={occ.id}>
+                          <td style={{ fontWeight: 500 }}>{occ.title}</td>
+                          <td>{occ.date}</td>
+                          <td>{occ.image ? occ.image.split("/uploads/")[1] || occ.image : ""}</td>
+                          <td>{occ.aartisCount} Aartis</td>
+                          <td>
+                            <span className={`status-badge ${occ.status.toLowerCase()}`}>{occ.status}</span>
+                          </td>
+                          <td>
+                            <div className="action-links">
+                              <span className="action-link edit" style={{ cursor: "pointer", marginRight: "0.75rem" }} onClick={() => handleEditCalendarClick(occ)}>
+                                Edit
+                              </span>
+                              <span className="action-link delete" style={{ cursor: "pointer" }} onClick={() => handleDeleteOccasion(occ.id)}>
+                                Delete
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} style={{ textAlign: "center", color: "var(--text-secondary)", padding: "2rem" }}>
+                          No occasions found. Click "+ Add Occasion" to create one.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -3259,7 +3572,197 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
+
+      {/* ── DEVOTIONAL LIBRARY MODAL ── */}
+      {showLibraryModal && (
+        <div className="dashboard-modal-backdrop" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(10, 8, 4, 0.85)", backdropFilter: "blur(12px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+          <div style={{ background: "var(--bg-secondary, #151108)", border: "1px solid var(--glass-border, rgba(212,160,23,0.15))", borderRadius: "12px", width: "100%", maxWidth: "600px", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 10px 40px rgba(0,0,0,0.6)", overflow: "hidden" }}>
+            <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid rgba(212,160,23,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(212,160,23,0.02)" }}>
+              <h3 style={{ fontFamily: "var(--font-cinzel), serif", fontSize: "1.05rem", color: "var(--accent-gold)", margin: 0 }}>
+                {editingLibraryId ? "Edit Library Resource" : "Add Library Resource"}
+              </h3>
+              <button onClick={() => { setShowLibraryModal(false); resetLibraryForm(); }} style={{ background: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer", fontSize: "1.2rem" }}>✕</button>
+            </div>
+            <form onSubmit={handleSaveLibrary} style={{ padding: "1.5rem", overflowY: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="dashboard-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Resource Title *</label>
+                  <input type="text" className="dashboard-input" required value={libraryTitle} onChange={(e) => setLibraryTitle(e.target.value)} disabled={librarySubmitting} />
+                </div>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Category *</label>
+                  <select className="dashboard-input" value={libraryCategory} onChange={(e) => setLibraryCategory(e.target.value)} disabled={librarySubmitting}>
+                    <option value="Stotrams">Stotrams</option>
+                    <option value="Mantras">Mantras</option>
+                    <option value="Chalisa & Hymns">Chalisa & Hymns</option>
+                    <option value="Bhajans">Bhajans</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Short Description</label>
+                <input type="text" className="dashboard-input" value={libraryDescription} onChange={(e) => setLibraryDescription(e.target.value)} disabled={librarySubmitting} />
+              </div>
+
+              <div className="dashboard-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Audio File {editingLibraryId ? "(Optional)" : "*"}</label>
+                  <input type="file" accept="audio/*" onChange={handleLibraryAudioChange} required={!editingLibraryId} disabled={librarySubmitting} style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }} />
+                </div>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Thumbnail Image</label>
+                  <input type="file" accept="image/*" onChange={(e) => setLibraryThumbFile(e.target.files?.[0] || null)} disabled={librarySubmitting} style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }} />
+                </div>
+              </div>
+
+              <div className="dashboard-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Duration Override</label>
+                  <input type="text" className="dashboard-input" placeholder="e.g. 09:45" value={libraryDuration} onChange={(e) => setLibraryDuration(e.target.value)} disabled={librarySubmitting} />
+                </div>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Creation Date (Optional)</label>
+                  <input type="date" className="dashboard-input" value={libraryDate} onChange={(e) => setLibraryDate(e.target.value)} disabled={librarySubmitting} />
+                </div>
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Sanskrit Lyrics</label>
+                <textarea className="dashboard-input" rows={3} style={{ resize: "vertical", fontFamily: "inherit" }} value={libraryLyrics} onChange={(e) => setLibraryLyrics(e.target.value)} disabled={librarySubmitting} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">English Translation</label>
+                <textarea className="dashboard-input" rows={3} style={{ resize: "vertical", fontFamily: "inherit" }} value={libraryTranslation} onChange={(e) => setLibraryTranslation(e.target.value)} disabled={librarySubmitting} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Status</label>
+                <select className="dashboard-input" value={libraryStatus} onChange={(e) => setLibraryStatus(e.target.value as any)} disabled={librarySubmitting}>
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", justifyContent: "flex-end" }}>
+                <button type="button" onClick={() => { setShowLibraryModal(false); resetLibraryForm(); }} className="dashboard-logout-btn" disabled={librarySubmitting} style={{ padding: "0.6rem 1.2rem", borderRadius: "6px", cursor: "pointer", margin: 0, fontSize: "0.85rem", height: "auto", width: "auto" }}>Cancel</button>
+                <button type="submit" className="dashboard-save-btn" disabled={librarySubmitting} style={{ padding: "0.6rem 1.5rem", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem", margin: 0, width: "auto" }}>
+                  {librarySubmitting ? "Saving..." : editingLibraryId ? "Save Changes" : "Create Item"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── SACRED CALENDAR MODAL ── */}
+      {showCalendarModal && (
+        <div className="dashboard-modal-backdrop" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(10, 8, 4, 0.85)", backdropFilter: "blur(12px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+          <div style={{ background: "var(--bg-secondary, #151108)", border: "1px solid var(--glass-border, rgba(212,160,23,0.15))", borderRadius: "12px", width: "100%", maxWidth: "600px", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 10px 40px rgba(0,0,0,0.6)", overflow: "hidden" }}>
+            <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid rgba(212,160,23,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(212,160,23,0.02)" }}>
+              <h3 style={{ fontFamily: "var(--font-cinzel), serif", fontSize: "1.05rem", color: "var(--accent-gold)", margin: 0 }}>
+                {editingCalendarId ? "Edit Calendar Occasion" : "Add Calendar Occasion"}
+              </h3>
+              <button onClick={() => { setShowCalendarModal(false); resetCalendarForm(); }} style={{ background: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer", fontSize: "1.2rem" }}>✕</button>
+            </div>
+            <form onSubmit={handleSaveCalendar} style={{ padding: "1.5rem", overflowY: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="dashboard-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Occasion Title *</label>
+                  <input type="text" className="dashboard-input" required value={calendarTitle} onChange={(e) => setCalendarTitle(e.target.value)} disabled={calendarSubmitting} />
+                </div>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Date String * (e.g. 15 February 2026)</label>
+                  <input type="text" className="dashboard-input" placeholder="e.g. 15 February 2026" required value={calendarDateStr} onChange={(e) => setCalendarDateStr(e.target.value)} disabled={calendarSubmitting} />
+                </div>
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Occasion Image {editingCalendarId ? "(Optional)" : "*"}</label>
+                <input type="file" accept="image/*" onChange={(e) => setCalendarImageFile(e.target.files?.[0] || null)} required={!editingCalendarId} disabled={calendarSubmitting} style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Short Description *</label>
+                <textarea className="dashboard-input" rows={2} required value={calendarDescription} onChange={(e) => setCalendarDescription(e.target.value)} disabled={calendarSubmitting} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">More Details / Shringar Info</label>
+                <textarea className="dashboard-input" rows={4} value={calendarMoreInfo} onChange={(e) => setCalendarMoreInfo(e.target.value)} disabled={calendarSubmitting} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Status</label>
+                <select className="dashboard-input" value={calendarStatus} onChange={(e) => setCalendarStatus(e.target.value as any)} disabled={calendarSubmitting}>
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", justifyContent: "flex-end" }}>
+                <button type="button" onClick={() => { setShowCalendarModal(false); resetCalendarForm(); }} className="dashboard-logout-btn" disabled={calendarSubmitting} style={{ padding: "0.6rem 1.2rem", borderRadius: "6px", cursor: "pointer", margin: 0, fontSize: "0.85rem", height: "auto", width: "auto" }}>Cancel</button>
+                <button type="submit" className="dashboard-save-btn" disabled={calendarSubmitting} style={{ padding: "0.6rem 1.5rem", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem", margin: 0, width: "auto" }}>
+                  {calendarSubmitting ? "Saving..." : editingCalendarId ? "Save Changes" : "Create Occasion"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── SACRED MOMENTS (GALLERY) MODAL ── */}
+      {showGalleryModal && (
+        <div className="dashboard-modal-backdrop" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(10, 8, 4, 0.85)", backdropFilter: "blur(12px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+          <div style={{ background: "var(--bg-secondary, #151108)", border: "1px solid var(--glass-border, rgba(212,160,23,0.15))", borderRadius: "12px", width: "100%", maxWidth: "600px", maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 10px 40px rgba(0,0,0,0.6)", overflow: "hidden" }}>
+            <div style={{ padding: "1.1rem 1.5rem", borderBottom: "1px solid rgba(212,160,23,0.1)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(212,160,23,0.02)" }}>
+              <h3 style={{ fontFamily: "var(--font-cinzel), serif", fontSize: "1.05rem", color: "var(--accent-gold)", margin: 0 }}>
+                {editingGalleryId ? "Edit Gallery Moment" : "Add Gallery Moment"}
+              </h3>
+              <button onClick={() => { setShowGalleryModal(false); resetGalleryForm(); }} style={{ background: "transparent", border: "none", color: "var(--text-secondary)", cursor: "pointer", fontSize: "1.2rem" }}>✕</button>
+            </div>
+            <form onSubmit={handleSaveGallery} style={{ padding: "1.5rem", overflowY: "auto", display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="dashboard-form-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Moment Title *</label>
+                  <input type="text" className="dashboard-input" required value={galleryTitle} onChange={(e) => setGalleryTitle(e.target.value)} disabled={gallerySubmitting} />
+                </div>
+                <div className="dashboard-form-group">
+                  <label className="dashboard-label">Date String * (e.g. 15 June 2026)</label>
+                  <input type="text" className="dashboard-input" placeholder="e.g. 15 June 2026" required value={galleryDateStr} onChange={(e) => setGalleryDateStr(e.target.value)} disabled={gallerySubmitting} />
+                </div>
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Moment Image {editingGalleryId ? "(Optional)" : "*"}</label>
+                <input type="file" accept="image/*" onChange={(e) => setGalleryImageFile(e.target.files?.[0] || null)} required={!editingGalleryId} disabled={gallerySubmitting} style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Description *</label>
+                <textarea className="dashboard-input" rows={4} required value={galleryDescription} onChange={(e) => setGalleryDescription(e.target.value)} disabled={gallerySubmitting} />
+              </div>
+
+              <div className="dashboard-form-group">
+                <label className="dashboard-label">Status</label>
+                <select className="dashboard-input" value={galleryStatus} onChange={(e) => setGalleryStatus(e.target.value as any)} disabled={gallerySubmitting}>
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", justifyContent: "flex-end" }}>
+                <button type="button" onClick={() => { setShowGalleryModal(false); resetGalleryForm(); }} className="dashboard-logout-btn" disabled={gallerySubmitting} style={{ padding: "0.6rem 1.2rem", borderRadius: "6px", cursor: "pointer", margin: 0, fontSize: "0.85rem", height: "auto", width: "auto" }}>Cancel</button>
+                <button type="submit" className="dashboard-save-btn" disabled={gallerySubmitting} style={{ padding: "0.6rem 1.5rem", borderRadius: "6px", cursor: "pointer", fontSize: "0.85rem", margin: 0, width: "auto" }}>
+                  {gallerySubmitting ? "Saving..." : editingGalleryId ? "Save Changes" : "Create Moment"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      </div>
   );
 }
 

@@ -17,6 +17,9 @@ const AboutSettings = require("./models/AboutSettings");
 const TrustSettings = require("./models/TrustSettings");
 const Media = require("./models/Media");
 const Aarti = require("./models/Aarti");
+const LibraryItem = require("./models/LibraryItem");
+const CalendarEvent = require("./models/CalendarEvent");
+const GalleryItem = require("./models/GalleryItem");
 
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/adminManagement");
@@ -25,6 +28,9 @@ const aboutRoutes = require("./routes/aboutSettings");
 const trustRoutes = require("./routes/trustSettings");
 const mediaRoutes = require("./routes/media");
 const aartiRoutes = require("./routes/aarti");
+const libraryRoutes = require("./routes/libraryItem");
+const calendarRoutes = require("./routes/calendarEvent");
+const galleryRoutes = require("./routes/galleryItem");
 
 
 
@@ -77,6 +83,9 @@ app.use("/api/about", aboutRoutes);
 app.use("/api/trust", trustRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/aartis", aartiRoutes);
+app.use("/api/library", libraryRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 
 // ── 404 handler ──────────────────────────────────────────────────────────────
@@ -100,6 +109,9 @@ const start = async () => {
     await TrustSettings.createTable();
     await Media.createTable();
     await Aarti.createTable();
+    await LibraryItem.createTable();
+    await CalendarEvent.createTable();
+    await GalleryItem.createTable();
 
 
     app.listen(PORT, () => {

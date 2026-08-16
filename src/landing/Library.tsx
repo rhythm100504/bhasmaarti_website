@@ -1,6 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+interface LibraryItem {
+  id: number;
+  title: string;
+  description: string;
+  thumbnail_url: string;
+  status: string;
+}
 
 export default function Library() {
+  const [items, setItems] = useState<LibraryItem[]>([]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/library");
+        const data = await res.json();
+        if (data.success && data.items) {
+          const published = data.items
+            .filter((item: any) => item.status === "Published")
+            .slice(0, 8); // Only show top 8
+          setItems(published);
+        }
+      } catch (err) {
+        console.error("Failed to load library items", err);
+      }
+    };
+    fetchItems();
+  }, []);
+
   return (
     <section id="library">
       <div className="section-header-flex">
@@ -15,102 +43,31 @@ export default function Library() {
       </div>
 
       <div className="library-grid">
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/mahakal%20chalisa.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Mahakal Chalisa</h4>
-            <p>Forty verses of devotion to Lord Mahakal</p>
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div className="library-card fade-in" key={item.id} onClick={() => window.location.href = "/library"}>
+              <div
+                className="library-icon"
+                style={{
+                  backgroundImage: `url('${item.thumbnail_url || "/rudrashtakam.jpeg"}')`
+                }}
+              ></div>
+              <div className="library-info">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+              </div>
+              <div className="library-play">
+                <svg viewBox="0 0 16 16">
+                  <polygon points="4,2 13,8 4,14" />
+                </svg>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ color: "var(--text-secondary)", fontStyle: "italic", padding: "2rem" }}>
+            Loading resources...
           </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/shiv%20tandav%20stotram.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Shiv Tandav Stotram</h4>
-            <p>The cosmic dance hymn of Ravana</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/mahamrityunjay%20mantra.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Mahamrityunjaya Mantra</h4>
-            <p>The great mantra of liberation and healing</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/shiv%20bhajans.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Shiv Bhajans Collection</h4>
-            <p>Devotional songs curated for worship</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/rudrashtakam.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Rudrashtakam</h4>
-            <p>The eight-verse hymn dedicated to Lord Shiva</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/Shivashtakam.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Shivashtakam</h4>
-            <p>The eight-verse hymn dedicated to Lord Shiva</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/shiv%20sahasranamam.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Shiv Sahasranama</h4>
-            <p>1000 names of Lord Shiva with meaning</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
-        <div className="library-card fade-in">
-          <div className="library-icon" style={{ backgroundImage: "url('/library/lingashtakam.jpeg')" }}></div>
-          <div className="library-info">
-            <h4>Lingashtakam Stotram</h4>
-            <p>The eight-verse hymn dedicated to Shiva Linga</p>
-          </div>
-          <div className="library-play">
-            <svg viewBox="0 0 16 16">
-              <polygon points="4,2 13,8 4,14" />
-            </svg>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

@@ -1,6 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+interface GalleryItem {
+  id: number;
+  title: string;
+  image_url: string;
+  status: string;
+}
 
 export default function Gallery() {
+  const [items, setItems] = useState<GalleryItem[]>([]);
+  const heights = ["220px", "160px", "200px", "180px", "240px", "160px", "190px", "210px", "175px"];
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/gallery");
+        const data = await res.json();
+        if (data.success && data.items) {
+          const published = data.items
+            .filter((item: any) => item.status === "Published")
+            .slice(0, 9);
+          setItems(published);
+        }
+      } catch (err) {
+        console.error("Failed to load gallery items", err);
+      }
+    };
+    fetchItems();
+  }, []);
+
   return (
     <section id="gallery">
       <div className="section-header-flex">
@@ -15,60 +43,26 @@ export default function Gallery() {
       </div>
 
       <div className="masonry">
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "220px", backgroundImage: "url('/Sacred%20Moments/Mahakaleshwar%20Shikhara%20at%20Dawn.jpg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Mahakaleshwar Shikhara at Dawn</span>
+        {items.length > 0 ? (
+          items.map((item, index) => (
+            <div className="masonry-item" key={item.id} onClick={() => window.location.href = "/gallery"} style={{ cursor: "pointer" }}>
+              <div 
+                className="gallery-img" 
+                style={{ 
+                  height: heights[index % heights.length], 
+                  backgroundImage: `url('${item.image_url || "/Sacred Moments/evening glow.jpeg"}')` 
+                }}
+              ></div>
+              <div className="gallery-overlay">
+                <span className="gallery-caption">{item.title}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ color: "var(--text-secondary)", fontStyle: "italic", padding: "2rem" }}>
+            Loading moments...
           </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "160px", backgroundImage: "url('/Sacred%20Moments/Bhasma%20Aarti%20Flames.png')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Bhasma Aarti Flames</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "200px", backgroundImage: "url('/Sacred%20Moments/Temple%20Bells%20at%20Brahma%20Muhurta.webp')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Temple Bells at Brahma Muhurta</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "180px", backgroundImage: "url('/Sacred%20Moments/Full%20Moon%20over%20Ujjain.jpeg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Full Moon over Ujjain</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "240px", backgroundImage: "url('/Sacred%20Moments/Sacred%20Abhishek%20Ritual.jpg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Sacred Abhishek Ritual</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "160px", backgroundImage: "url('/Sacred%20Moments/Floral%20Offerings.jpg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Floral Offerings</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "190px", backgroundImage: "url('/Sacred%20Moments/Trishula%20at%20the%20Main%20Gate.jpg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Trishula at the Main Gate</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "210px", backgroundImage: "url('/Sacred%20Moments/Rudraksha%20%26%20Sacred%20Beads.jpeg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Rudraksha & Sacred Beads</span>
-          </div>
-        </div>
-        <div className="masonry-item">
-          <div className="gallery-img" style={{ height: "175px", backgroundImage: "url('/Sacred%20Moments/evening%20glow.jpeg')" }}></div>
-          <div className="gallery-overlay">
-            <span className="gallery-caption">Evening Aarti Glow</span>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

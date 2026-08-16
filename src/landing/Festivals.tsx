@@ -1,6 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+interface OccasionItem {
+  id: number;
+  title: string;
+  description: string;
+  date: string;
+  image_url: string;
+  status: string;
+}
 
 export default function Festivals() {
+  const [items, setItems] = useState<OccasionItem[]>([]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/calendar");
+        const data = await res.json();
+        if (data.success && data.items) {
+          const published = data.items
+            .filter((item: any) => item.status === "Published")
+            .slice(0, 4); // Show top 4
+          setItems(published);
+        }
+      } catch (err) {
+        console.error("Failed to load calendar occasions", err);
+      }
+    };
+    fetchItems();
+  }, []);
+
   return (
     <section id="festivals">
       <div className="section-header-flex">
@@ -15,46 +44,27 @@ export default function Festivals() {
       </div>
 
       <div className="festival-grid">
-        <div className="festival-card fade-in">
-          <div className="festival-hero">
-            <div className="festival-hero-bg" style={{ backgroundImage: "url('/Sacred%20Calendar/Mahashivratri.jpg')" }}></div>
+        {items.length > 0 ? (
+          items.map((item) => (
+            <div className="festival-card fade-in" key={item.id} onClick={() => window.location.href = "/calendar"} style={{ cursor: "pointer" }}>
+              <div className="festival-hero">
+                <div 
+                  className="festival-hero-bg" 
+                  style={{ backgroundImage: `url('${item.image_url || "/Sacred Calendar/Mahashivratri.jpg"}')` }}
+                ></div>
+              </div>
+              <div className="festival-info">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+                <span className="festival-date">{item.date}</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div style={{ color: "var(--text-secondary)", fontStyle: "italic", padding: "2rem" }}>
+            Loading calendar occasions...
           </div>
-          <div className="festival-info">
-            <h3>Mahashivratri</h3>
-            <p>The grand night of Lord Shiva — a night-long vigil of devotion, chanting, and Abhishek at Mahakaleshwar</p>
-            <span className="festival-date">February 2026</span>
-          </div>
-        </div>
-        <div className="festival-card fade-in">
-          <div className="festival-hero">
-            <div className="festival-hero-bg" style={{ backgroundImage: "url('/Sacred%20Calendar/Shravan%20Maas.jpeg')" }}></div>
-          </div>
-          <div className="festival-info">
-            <h3>Shravan Maas</h3>
-            <p>The holy month of Shiva — daily special Bhasma Aartis, Kanwar yatras, and temple festivities throughout</p>
-            <span className="festival-date">July–August 2025</span>
-          </div>
-        </div>
-        <div className="festival-card fade-in">
-          <div className="festival-hero">
-            <div className="festival-hero-bg" style={{ backgroundImage: "url('/Sacred%20Calendar/Sawan%20Somvar.jpg')" }}></div>
-          </div>
-          <div className="festival-info">
-            <h3>Sawan Somvar</h3>
-            <p>Monday fasts and special Shiva worship during the holy month — a deeply auspicious time at Mahakaleshwar</p>
-            <span className="festival-date">Every Monday, Shravan</span>
-          </div>
-        </div>
-        <div className="festival-card fade-in">
-          <div className="festival-hero">
-            <div className="festival-hero-bg" style={{ backgroundImage: "url('/Sacred%20Calendar/Nag%20Panchami.jpeg')" }}></div>
-          </div>
-          <div className="festival-info">
-            <h3>Nag Panchami</h3>
-            <p>The ancient festival of serpent worship — sacred traditions observed with great devotion in Ujjain</p>
-            <span className="festival-date">August 2025</span>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

@@ -25,60 +25,36 @@ export default function CalendarPage() {
   const [activeAarti, setActiveAarti] = useState<Aarti | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const occasions: Occasion[] = [
-    {
-      title: "Mahashivratri",
-      date: "15 February 2026",
-      image: "/Sacred Calendar/Mahashivratri.jpg",
-      shringarInfo: "On the grand night of Mahashivratri, Lord Mahakaleshwar is adorned with the Maha-Shringar — a magnificent crown crafted from gold, diamonds, and precious gems. The entire inner sanctum is decorated with tonnes of fresh exotic flowers. Devotees queue throughout the night to witness this celestial bridegroom form of Shiva.",
-      aartis: [
-        { name: "Bhasma Aarti", time: "4:00 AM – 6:00 AM", duration: "56:12", thumb: "/bhasma-aarti-preview.png" },
-        { name: "Dadyodak Aarti", time: "7:30 AM – 8:15 AM", duration: "32:45", thumb: "/aarti-diya-thumb.png" },
-        { name: "Bhog Aarti", time: "10:30 AM – 11:15 AM", duration: "28:10", thumb: "/library/lingashtakam.jpeg" },
-        { name: "Sandhya Aarti", time: "6:30 PM – 7:15 PM", duration: "49:30", thumb: "/temple-bell-thumb.png" },
-        { name: "Shayan Aarti", time: "10:30 PM – 11:00 PM", duration: "31:15", thumb: "/mahakal-temple.png" }
-      ]
-    },
-    {
-      title: "Shravan Maas",
-      date: "05 August 2025",
-      image: "/Sacred Calendar/Shravan Maas.jpeg",
-      shringarInfo: "During the holy month of Shravan, the Jyotirlinga is decorated daily in distinct divine forms. This specific Shringar captures the deity adorned with a massive silver serpent (Sheshnag) wrapping around the Lingam, surrounded by green Bilva leaves, representing protective power and cosmic wisdom.",
-      aartis: [
-        { name: "Bhasma Aarti", time: "4:00 AM – 6:00 AM", duration: "52:40", thumb: "/bhasma-aarti-preview.png" },
-        { name: "Dadyodak Aarti", time: "7:00 AM – 7:45 AM", duration: "35:12", thumb: "/aarti-diya-thumb.png" },
-        { name: "Bhog Aarti", time: "10:00 AM – 10:45 AM", duration: "30:05", thumb: "/library/lingashtakam.jpeg" },
-        { name: "Sandhya Aarti", time: "7:00 PM – 7:45 PM", duration: "44:22", thumb: "/temple-bell-thumb.png" },
-        { name: "Shayan Aarti", time: "10:30 PM – 11:00 PM", duration: "26:50", thumb: "/mahakal-temple.png" }
-      ]
-    },
-    {
-      title: "Sawan Somvar",
-      date: "11 August 2025",
-      image: "/Sacred Calendar/Sawan Somvar.jpg",
-      shringarInfo: "On the Mondays of Shravan, a grand procession (Sawan Somvar Sawari) is held through Ujjain. The Shringar Darshan inside the sanctum depicts Lord Shiva in the 'Chandramouleshwar' form riding the holy bull Nandi, draped with fresh flower garlands and sandalwood paste offerings.",
-      aartis: [
-        { name: "Bhasma Aarti", time: "4:00 AM – 6:00 AM", duration: "54:15", thumb: "/bhasma-aarti-preview.png" },
-        { name: "Dadyodak Aarti", time: "7:00 AM – 7:45 AM", duration: "31:40", thumb: "/aarti-diya-thumb.png" },
-        { name: "Bhog Aarti", time: "10:00 AM – 10:45 AM", duration: "29:50", thumb: "/library/lingashtakam.jpeg" },
-        { name: "Sandhya Aarti", time: "7:00 PM – 7:45 PM", duration: "48:05", thumb: "/temple-bell-thumb.png" },
-        { name: "Shayan Aarti", time: "10:30 PM – 11:00 PM", duration: "27:10", thumb: "/mahakal-temple.png" }
-      ]
-    },
-    {
-      title: "Nag Panchami",
-      date: "29 August 2025",
-      image: "/Sacred Calendar/Nag Panchami.jpeg",
-      shringarInfo: "The only day of the year when the shrine of Lord Nagchandreshwar on the third floor of the temple complex opens for public Darshan. The Jyotirlinga below is adorned with a unique Nag-Shringar, celebrating the divine union of Shiva, Parvati, and the serpent king.",
-      aartis: [
-        { name: "Bhasma Aarti", time: "4:00 AM – 6:00 AM", duration: "58:02", thumb: "/bhasma-aarti-preview.png" },
-        { name: "Dadyodak Aarti", time: "7:30 AM – 8:15 AM", duration: "33:15", thumb: "/aarti-diya-thumb.png" },
-        { name: "Bhog Aarti", time: "10:30 AM – 11:15 AM", duration: "27:40", thumb: "/library/lingashtakam.jpeg" },
-        { name: "Sandhya Aarti", time: "6:30 PM – 7:15 PM", duration: "51:12", thumb: "/temple-bell-thumb.png" },
-        { name: "Shayan Aarti", time: "10:30 PM – 11:00 PM", duration: "28:40", thumb: "/mahakal-temple.png" }
-      ]
-    }
-  ];
+  const [occasions, setOccasions] = useState<Occasion[]>([]);
+
+  React.useEffect(() => {
+    const fetchOccasions = async () => {
+      try {
+        const res = await fetch("http://localhost:5001/api/calendar");
+        const data = await res.json();
+        if (data.success && data.items) {
+          const published = data.items.filter((item: any) => item.status === "Published").map((item: any) => ({
+            title: item.title,
+            description: item.description || "",
+            date: item.date,
+            image: item.image_url || "/Sacred Calendar/Mahashivratri.jpg",
+            shringarInfo: item.more_info || "",
+            aartis: [
+              { name: "Bhasma Aarti", time: "4:00 AM – 6:00 AM", duration: "56:12", thumb: "/bhasma-aarti-preview.png" },
+              { name: "Dadyodak Aarti", time: "7:30 AM – 8:15 AM", duration: "32:45", thumb: "/aarti-diya-thumb.png" },
+              { name: "Bhog Aarti", time: "10:30 AM – 11:15 AM", duration: "28:10", thumb: "/library/lingashtakam.jpeg" },
+              { name: "Sandhya Aarti", time: "6:30 PM – 7:15 PM", duration: "49:30", thumb: "/temple-bell-thumb.png" },
+              { name: "Shayan Aarti", time: "10:30 PM – 11:00 PM", duration: "31:15", thumb: "/mahakal-temple.png" }
+            ].slice(0, item.aartis_count || 5)
+          }));
+          setOccasions(published);
+        }
+      } catch (err) {
+        console.error("Failed to load calendar occasions", err);
+      }
+    };
+    fetchOccasions();
+  }, []);
 
   const handleOccasionClick = (occ: Occasion) => {
     setSelectedOccasion(occ);

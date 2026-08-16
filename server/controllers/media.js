@@ -21,17 +21,18 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter to restrict uploads to images, videos, and PDFs
+// File filter to restrict uploads to images, videos, audio, and PDFs
 const fileFilter = (req, file, cb) => {
   const mime = file.mimetype;
   if (
     mime.startsWith("image/") ||
     mime.startsWith("video/") ||
+    mime.startsWith("audio/") ||
     mime === "application/pdf"
   ) {
     cb(null, true);
   } else {
-    cb(new Error("Invalid file type. Only images, videos, and PDFs are allowed."), false);
+    cb(new Error("Invalid file type. Only images, videos, audio, and PDFs are allowed."), false);
   }
 };
 
@@ -39,7 +40,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 100 * 1024 * 1024 // 100MB limit for video support
+    fileSize: 100 * 1024 * 1024 // 100MB limit for video/audio support
   }
 });
 
@@ -56,6 +57,8 @@ const uploadFile = async (req, res) => {
       file_type = "image";
     } else if (mime.startsWith("video/")) {
       file_type = "video";
+    } else if (mime.startsWith("audio/")) {
+      file_type = "audio";
     }
 
     // Public URL matching static folder serving on port 5001
